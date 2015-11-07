@@ -37,9 +37,9 @@ trait InfluxDBApi {
       r <- sendGetRequest("/ping")
       headers = r.headers
       h = if (isVersionHeader(headers)) {
-        InfluxDBStatus("OK", version(headers, true))
+        InfluxDBStatus("OK", version(headers))
       } else {
-        InfluxDBStatus("InfluxDB is Down!", version(headers, false))
+        InfluxDBStatus("InfluxDB is Down!", version(headers))
       }
     } yield h
   }
@@ -67,8 +67,8 @@ trait InfluxDBApi {
     headers.exists(h => h.name == "X-Influxdb-Version")
   }
 
-  private def version(headers: Seq[HttpHeader], isHeaderVersion: Boolean): String = {
-    if (isHeaderVersion)
+  private def version(headers: Seq[HttpHeader]): String = {
+    if (isVersionHeader(headers))
       headers.find(h => h.name == "X-Influxdb-Version").get.value().toString
     else
       ""
