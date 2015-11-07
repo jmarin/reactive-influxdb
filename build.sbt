@@ -4,16 +4,26 @@ scalaVersion := "2.11.7"
 
 Defaults.itSettings
 
-lazy val `it-config-sbt-project` = project.in(file(".")).configs(IntegrationTest)
+scalariformSettings
 
-val akkaStreamsVersion = "1.0"
+lazy val `reactive-influxdb` = project.in(file(".")).configs(IntegrationTest)
+
+val akkaStreamsVersion = "2.0-M1"
+
+val configVersion = "1.3.0"
+
+val slf4jVersion = "1.7.12"
+
+val logbackVersion = "1.1.3"
+
+val scalatestVersion = "2.2.4"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream-experimental" % "1.0",
-  "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0",
-  "com.typesafe.akka" %% "akka-http-testkit-experimental" % "1.0" % "it, test",
-  "com.typesafe" % "config" % "1.3.0",
-  "org.slf4j" % "slf4j-api" % "1.7.12",
-  "ch.qos.logback" % "logback-classic" % "1.1.3",
-  "org.scalatest" %% "scalatest" % "2.2.4" % "it, test"
+  "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamsVersion,
+  "com.typesafe.akka" %% "akka-http-core-experimental" % akkaStreamsVersion,
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaStreamsVersion,
+  "com.typesafe" % "config" % configVersion,
+  "org.slf4j" % "slf4j-api" % slf4jVersion,
+  "ch.qos.logback" % "logback-classic" % logbackVersion,
+  "org.scalatest" %% "scalatest" % scalatestVersion % "it, test"
 )
