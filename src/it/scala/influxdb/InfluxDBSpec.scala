@@ -12,9 +12,11 @@ class InfluxDBSpec extends FlatSpec with MustMatchers {
 
   val timeout = 5.seconds
 
-  "A Ping request" must "return a response" in {
+  "InfluxDB" must "respond to ping" in {
     val maybePing = Await.result(InfluxDB.ping, timeout)
-    maybePing mustBe InfluxDBStatus("OK")
+    maybePing mustBe InfluxDBStatus("OK", "0.9.4.1")
   }
+
+
 
 }

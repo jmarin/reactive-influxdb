@@ -1,3 +1,3 @@
 package influxdb.model
 
-case class InfluxDBStatus(status: String)
+case class InfluxDBStatus(status: String, version: String)
