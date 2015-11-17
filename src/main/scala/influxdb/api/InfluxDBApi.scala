@@ -7,8 +7,9 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.stream.{ StreamTcpException, ActorMaterializer }
 import akka.stream.scaladsl.{ Sink, Source, Flow }
-import akka.util.Timeout
+import akka.util.{ByteString, Timeout}
 import com.typesafe.config.Config
+import influxdb.model.LineProtocol.Line
 import influxdb.model.{ InfluxDBResults, InfluxDBStatus }
 import org.slf4j.LoggerFactory
 import scala.collection.immutable.Seq
@@ -19,7 +20,7 @@ trait InfluxDBApi {
   implicit val askTimeout: Timeout
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
-  implicit val ec: ExecutionContext
+  implicit val ec: ExecutionContext = system.dispatcher
 
   val host: String
   val port: Int
@@ -29,6 +30,8 @@ trait InfluxDBApi {
   private val logger = LoggerFactory.getLogger(getClass)
 
   val connFlow: Flow[HttpRequest, HttpResponse, Future[Http.OutgoingConnection]]
+
+  val connectionFlow = Http().outgoingConnection(host, port)
 
   def createdb(): Future[InfluxDBResults] = ???
 
@@ -46,12 +49,21 @@ trait InfluxDBApi {
 
   def read(): Unit = ???
 
-  def write(): Unit = ???
+  def write(db: String, line: Line): Unit = {
+    sendPostRequest(s"/write?db=$db", line.toString)
+  }
 
   private def sendGetRequest(path: Uri): Future[HttpResponse] = {
-    implicit val ec: ExecutionContext = system.dispatcher
-    val connectionFlow = Http().outgoingConnection(host, port)
-    val request = HttpRequest(GET, path)
+    val request = HttpRequest(GET, uri = path)
+    processRequest(request)
+  }
+
+  private def sendPostRequest(path: Uri, data: String): Future[HttpResponse] = {
+    val request= HttpRequest(POST, uri = path, entity = ByteString(data))
+    processRequest(request)
+  }
+
+  private def processRequest(request: HttpRequest): Future[HttpResponse] = {
     Source.single(request).via(connectionFlow).runWith(Sink.head).recover {
       case e: StreamTcpException =>
         HttpResponse(
@@ -62,7 +74,6 @@ trait InfluxDBApi {
         )
     }
   }
-
   private def isVersionHeader(headers: Seq[HttpHeader]): Boolean = {
     headers.exists(h => h.name == "X-Influxdb-Version")
   }
