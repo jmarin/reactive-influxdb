@@ -28,6 +28,15 @@ class LineProtocolSpec extends FlatSpec with MustMatchers {
     assert(badLine.getMessage.trim === "requirement failed: A Line must contain at least one field")
   }
 
+  it must "serialize to line protocol" in {
+    val tag = Tag("host", "server01")
+    val key = Key("metrics", Seq(tag))
+    val field1 = Field("cpu", FloatValue(0.25))
+    val field2 = Field("memory", IntValue(256))
+    val line = Line(key, List(field1, field2), None)
+    line.toString mustBe "metrics,host=server01 cpu=0.25,memory=256i"
+  }
+
   "A Field" must "serialize int values to line protocol" in {
     val v = IntValue(2)
     v.toString mustBe "2i"

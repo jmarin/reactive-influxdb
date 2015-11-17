@@ -6,7 +6,7 @@ object LineProtocol {
     require(fields.nonEmpty, "A Line must contain at least one field")
     override def toString = {
       val timestamp = time.getOrElse("")
-      s"${key.toString} ${fields.toString} ${timestamp}".trim
+      s"${key.toString} ${fields.mkString(",")} ${timestamp}".trim
     }
   }
   case class Tag(name: String, value: String) {
@@ -22,15 +22,19 @@ object LineProtocol {
   }
 
   sealed trait FieldValue
+
   case class IntValue(v: Int) extends FieldValue {
     override def toString = v + "i".toString
   }
+
   case class FloatValue(v: Double) extends FieldValue {
     override def toString = v.toString
   }
+
   case class StringValue(s: String) extends FieldValue {
     override def toString = "\"" + s + "\""
   }
+
   case class BooleanValue(isTrue: Boolean) extends FieldValue {
     override def toString = if (isTrue) "true" else "false"
   }
